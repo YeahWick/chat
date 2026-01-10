@@ -17,15 +17,35 @@
       <div class="settings-content">
         <label for="api-key-input">API Key</label>
         <input type="password" id="api-key-input" placeholder="Enter your OpenRouter API key">
-        <label for="model-select">Model</label>
-        <select id="model-select">
-          <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
-          <option value="openai/gpt-4o">GPT-4o</option>
-          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-          <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
-          <option value="google/gemini-pro">Gemini Pro</option>
-          <option value="meta-llama/llama-3.1-8b-instruct">Llama 3.1 8B</option>
-        </select>
+        <div class="model-section">
+          <div class="model-header">
+            <label for="model-select">Model</label>
+            <div class="model-controls">
+              <span id="cache-age" class="cache-age"></span>
+              <button type="button" id="refresh-models-btn" class="icon-btn small" title="Refresh models list">↻</button>
+            </div>
+          </div>
+          <div class="model-filter-row">
+            <input type="text" id="model-search" placeholder="Search models..." class="model-search">
+            <select id="sort-select" class="sort-select">
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="name_desc">Name (Z-A)</option>
+              <option value="date_newest">Newest First</option>
+              <option value="date_oldest">Oldest First</option>
+              <option value="context_length">Context Length</option>
+              <option value="price_low">Price (Low-High)</option>
+              <option value="price_high">Price (High-Low)</option>
+            </select>
+          </div>
+          <select id="model-select" size="8">
+            <option value="">Loading models...</option>
+          </select>
+          <div id="model-status" class="model-status">
+            <span id="model-count"></span>
+            <button type="button" id="load-more-btn" class="btn btn-secondary btn-small">Load all models (requires API key)</button>
+          </div>
+          <div id="model-details" class="model-details"></div>
+        </div>
         <button id="save-settings-btn" class="btn">Save</button>
       </div>
     </div>

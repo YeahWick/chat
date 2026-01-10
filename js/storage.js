@@ -5,7 +5,10 @@
 const STORAGE_KEYS = {
   API_KEY: 'openrouter_api_key',
   MODEL: 'openrouter_model',
-  MESSAGES: 'openrouter_messages'
+  MESSAGES: 'openrouter_messages',
+  MODELS_CACHE: 'openrouter_models_cache',
+  MODELS_CACHE_TIMESTAMP: 'openrouter_models_cache_timestamp',
+  MODELS_SORT: 'openrouter_models_sort'
 };
 
 /**
@@ -95,12 +98,35 @@ export function clearMessages() {
 }
 
 /**
+ * Get the stored sort preference
+ * @param {string} defaultSort - Default sort option if none stored
+ * @returns {string} The stored sort preference or default
+ */
+export function getSortPreference(defaultSort = 'name_asc') {
+  return localStorage.getItem(STORAGE_KEYS.MODELS_SORT) || defaultSort;
+}
+
+/**
+ * Save the sort preference
+ * @param {string} sortOption - The sort option to store
+ */
+export function setSortPreference(sortOption) {
+  if (!sortOption || typeof sortOption !== 'string') {
+    throw new Error('Invalid sort option');
+  }
+  localStorage.setItem(STORAGE_KEYS.MODELS_SORT, sortOption);
+}
+
+/**
  * Clear all stored data
  */
 export function clearAll() {
   clearApiKey();
   clearMessages();
   localStorage.removeItem(STORAGE_KEYS.MODEL);
+  localStorage.removeItem(STORAGE_KEYS.MODELS_CACHE);
+  localStorage.removeItem(STORAGE_KEYS.MODELS_CACHE_TIMESTAMP);
+  localStorage.removeItem(STORAGE_KEYS.MODELS_SORT);
 }
 
 export { STORAGE_KEYS };

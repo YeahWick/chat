@@ -10,6 +10,8 @@ import {
   setMessages,
   clearMessages,
   clearAll,
+  getSortPreference,
+  setSortPreference,
   STORAGE_KEYS
 } from '../js/storage.js';
 
@@ -108,17 +110,39 @@ describe('Storage Module', () => {
     });
   });
 
+  describe('Sort Preference Management', () => {
+    it('should return default sort when none stored', () => {
+      expect(getSortPreference()).toBe('name_asc');
+    });
+
+    it('should return custom default sort', () => {
+      expect(getSortPreference('date_newest')).toBe('date_newest');
+    });
+
+    it('should store and retrieve sort preference', () => {
+      setSortPreference('price_low');
+      expect(getSortPreference()).toBe('price_low');
+    });
+
+    it('should throw error for invalid sort preference', () => {
+      expect(() => setSortPreference('')).toThrow('Invalid sort option');
+      expect(() => setSortPreference(null)).toThrow('Invalid sort option');
+    });
+  });
+
   describe('Clear All', () => {
     it('should clear all stored data', () => {
       setApiKey('test-key');
       setModel('test-model');
       setMessages([{ role: 'user', content: 'Hello' }]);
+      setSortPreference('date_newest');
 
       clearAll();
 
       expect(getApiKey()).toBeNull();
       expect(getModel()).toBe('openai/gpt-4o-mini');
       expect(getMessages()).toEqual([]);
+      expect(getSortPreference()).toBe('name_asc');
     });
   });
 });
