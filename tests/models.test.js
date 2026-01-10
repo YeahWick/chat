@@ -10,6 +10,9 @@ import {
   sortModels,
   filterModels,
   formatModelForDisplay,
+  getFreeModels,
+  isModelFree,
+  FREE_MODELS,
   SortOption,
   MODELS_STORAGE_KEYS,
   CACHE_DURATION_MS
@@ -357,6 +360,54 @@ describe('Models Module', () => {
     it('should format created date', () => {
       const formatted = formatModelForDisplay(mockModels[0]);
       expect(formatted.createdDate).toBeDefined();
+    });
+  });
+
+  describe('Free Models', () => {
+    it('should have a non-empty FREE_MODELS list', () => {
+      expect(FREE_MODELS).toBeDefined();
+      expect(FREE_MODELS.length).toBeGreaterThan(0);
+    });
+
+    it('should return a copy of free models', () => {
+      const freeModels = getFreeModels();
+      expect(freeModels).toEqual(FREE_MODELS);
+      expect(freeModels).not.toBe(FREE_MODELS); // Should be a copy
+    });
+
+    it('should identify free models by isFree flag', () => {
+      const model = { id: 'test/model', isFree: true };
+      expect(isModelFree(model)).toBe(true);
+    });
+
+    it('should identify free models by :free suffix', () => {
+      const model = { id: 'google/gemini-2.0-flash-exp:free' };
+      expect(isModelFree(model)).toBe(true);
+    });
+
+    it('should identify free models by zero pricing', () => {
+      const model = { id: 'test/model', pricing: { prompt: '0', completion: '0' } };
+      expect(isModelFree(model)).toBe(true);
+    });
+
+    it('should identify paid models', () => {
+      const model = { id: 'test/model', pricing: { prompt: '0.00001', completion: '0.00002' } };
+      expect(isModelFree(model)).toBe(false);
+    });
+
+    it('should treat models without pricing as paid', () => {
+      const model = { id: 'test/model' };
+      expect(isModelFree(model)).toBe(false);
+    });
+
+    it('should have all required fields in free models', () => {
+      FREE_MODELS.forEach(model => {
+        expect(model.id).toBeDefined();
+        expect(model.name).toBeDefined();
+        expect(model.context_length).toBeDefined();
+        expect(model.pricing).toBeDefined();
+        expect(model.isFree).toBe(true);
+      });
     });
   });
 });

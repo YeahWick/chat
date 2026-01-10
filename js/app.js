@@ -4,7 +4,7 @@
 
 import { Chat } from './chat.js';
 import { getApiKey, setApiKey, getModel, setModel, hasApiKey, getSortPreference, setSortPreference } from './storage.js';
-import { getModels, sortModels, filterModels, formatModelForDisplay, getCacheAge, SortOption } from './models.js';
+import { getModels, sortModels, filterModels, formatModelForDisplay, getCacheAge, getFreeModels, isModelFree } from './models.js';
 
 // DOM Elements
 const settingsBtn = document.getElementById('settings-btn');
@@ -16,6 +16,8 @@ const sortSelect = document.getElementById('sort-select');
 const refreshModelsBtn = document.getElementById('refresh-models-btn');
 const cacheAgeSpan = document.getElementById('cache-age');
 const modelDetails = document.getElementById('model-details');
+const modelCount = document.getElementById('model-count');
+const loadMoreBtn = document.getElementById('load-more-btn');
 const saveSettingsBtn = document.getElementById('save-settings-btn');
 const chatForm = document.getElementById('chat-form');
 const messageInput = document.getElementById('message-input');
@@ -25,6 +27,7 @@ const sendBtn = document.getElementById('send-btn');
 // State
 let allModels = [];
 let isLoadingModels = false;
+let hasLoadedFullList = false;
 
 // Initialize Chat
 const chat = new Chat({
@@ -72,10 +75,17 @@ function renderModelOptions(models) {
     const formatted = formatModelForDisplay(model);
     const option = document.createElement('option');
     option.value = model.id;
-    option.textContent = formatted.name;
-    if (formatted.detailsText) {
-      option.textContent += ` (${formatted.detailsText})`;
+
+    // Build display text
+    let displayText = formatted.name;
+    if (isModelFree(model)) {
+      displayText = `🆓 ${displayText}`;
     }
+    if (formatted.detailsText) {
+      displayText += ` (${formatted.detailsText})`;
+    }
+    option.textContent = displayText;
+
     if (model.id === currentModel) {
       option.selected = true;
     }
@@ -97,10 +107,26 @@ function renderModelOptions(models) {
  */
 function updateCacheAgeDisplay() {
   const age = getCacheAge();
-  if (age) {
+  if (age && hasLoadedFullList) {
     cacheAgeSpan.textContent = `Updated ${age}`;
   } else {
     cacheAgeSpan.textContent = '';
+  }
+}
+
+/**
+ * Update the model count display
+ */
+function updateModelCount() {
+  const freeCount = allModels.filter(m => isModelFree(m)).length;
+  const totalCount = allModels.length;
+
+  if (hasLoadedFullList) {
+    modelCount.innerHTML = `<span class="free-badge">FREE</span> ${freeCount} free of ${totalCount} models`;
+    loadMoreBtn.style.display = 'none';
+  } else {
+    modelCount.innerHTML = `<span class="free-badge">FREE</span> ${freeCount} free models`;
+    loadMoreBtn.style.display = 'block';
   }
 }
 
@@ -116,8 +142,9 @@ function updateModelDetails(model) {
 
   const formatted = formatModelForDisplay(model);
   const contextK = model.context_length ? Math.round(model.context_length / 1000) : 'N/A';
-  const promptPrice = model.pricing?.prompt ? (parseFloat(model.pricing.prompt) * 1000000).toFixed(2) : 'N/A';
-  const completionPrice = model.pricing?.completion ? (parseFloat(model.pricing.completion) * 1000000).toFixed(2) : 'N/A';
+  const isFree = isModelFree(model);
+  const promptPrice = isFree ? 'Free' : (model.pricing?.prompt ? `$${(parseFloat(model.pricing.prompt) * 1000000).toFixed(2)}/M` : 'N/A');
+  const completionPrice = isFree ? 'Free' : (model.pricing?.completion ? `$${(parseFloat(model.pricing.completion) * 1000000).toFixed(2)}/M` : 'N/A');
   const createdDate = formatted.createdDate || 'N/A';
 
   modelDetails.innerHTML = `
@@ -127,11 +154,11 @@ function updateModelDetails(model) {
     </div>
     <div class="detail-row">
       <span class="detail-label">Input Price:</span>
-      <span class="detail-value">$${promptPrice}/M tokens</span>
+      <span class="detail-value">${promptPrice}</span>
     </div>
     <div class="detail-row">
       <span class="detail-label">Output Price:</span>
-      <span class="detail-value">$${completionPrice}/M tokens</span>
+      <span class="detail-value">${completionPrice}</span>
     </div>
     <div class="detail-row">
       <span class="detail-label">Created:</span>
@@ -159,27 +186,43 @@ function applyFilterAndSort() {
 }
 
 /**
- * Load models from API or cache
+ * Load free models (no API key required)
+ */
+function loadFreeModels() {
+  allModels = getFreeModels();
+  hasLoadedFullList = false;
+
+  updateModelCount();
+  updateCacheAgeDisplay();
+  applyFilterAndSort();
+
+  console.log(`Loaded ${allModels.length} free models`);
+}
+
+/**
+ * Load all models from API or cache (requires API key)
  * @param {boolean} forceRefresh - Force refresh from API
  */
-async function loadModels(forceRefresh = false) {
+async function loadAllModels(forceRefresh = false) {
   const apiKey = apiKeyInput.value.trim() || getApiKey();
 
   if (!apiKey) {
-    modelSelect.innerHTML = '<option value="">Enter API key first</option>';
-    modelDetails.innerHTML = '<em>API key required to load models</em>';
+    modelDetails.innerHTML = '<em>Enter API key to load all models</em>';
     return;
   }
 
   isLoadingModels = true;
   refreshModelsBtn.disabled = true;
+  loadMoreBtn.disabled = true;
   refreshModelsBtn.innerHTML = '<span class="loading-spinner">↻</span>';
-  modelSelect.innerHTML = '<option value="">Loading models...</option>';
+  loadMoreBtn.textContent = 'Loading...';
 
   try {
     const result = await getModels(apiKey, forceRefresh);
     allModels = result.models;
+    hasLoadedFullList = true;
 
+    updateModelCount();
     updateCacheAgeDisplay();
     applyFilterAndSort();
 
@@ -190,37 +233,52 @@ async function loadModels(forceRefresh = false) {
     }
   } catch (error) {
     console.error('Failed to load models:', error);
-    modelSelect.innerHTML = '<option value="">Failed to load models</option>';
     modelDetails.innerHTML = `<em>Error: ${error.message}</em>`;
 
-    // Add some fallback options
-    const fallbackModels = [
-      { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
-      { id: 'openai/gpt-4o', name: 'GPT-4o' },
-      { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
-      { id: 'anthropic/claude-3-haiku', name: 'Claude 3 Haiku' }
-    ];
-    allModels = fallbackModels;
-    renderModelOptions(fallbackModels);
+    // Keep free models on error
+    if (!hasLoadedFullList) {
+      loadFreeModels();
+    }
   } finally {
     isLoadingModels = false;
     refreshModelsBtn.disabled = false;
+    loadMoreBtn.disabled = false;
     refreshModelsBtn.innerHTML = '↻';
+    loadMoreBtn.textContent = 'Load all models (requires API key)';
   }
 }
 
 // Toggle settings panel
 settingsBtn.addEventListener('click', () => {
   settingsPanel.classList.toggle('hidden');
-  // Load models when opening settings if we have an API key
+  // Load free models when opening settings if we haven't loaded any
   if (!settingsPanel.classList.contains('hidden') && allModels.length === 0) {
-    loadModels();
+    loadFreeModels();
+    // Also load full list if we have an API key
+    if (hasApiKey()) {
+      loadAllModels();
+    }
   }
 });
 
 // Refresh models button
 refreshModelsBtn.addEventListener('click', () => {
-  loadModels(true);
+  if (hasApiKey() || apiKeyInput.value.trim()) {
+    loadAllModels(true);
+  } else {
+    loadFreeModels();
+  }
+});
+
+// Load more button
+loadMoreBtn.addEventListener('click', () => {
+  const apiKey = apiKeyInput.value.trim() || getApiKey();
+  if (!apiKey) {
+    modelDetails.innerHTML = '<em>Please enter an API key first to load all models</em>';
+    apiKeyInput.focus();
+    return;
+  }
+  loadAllModels(false);
 });
 
 // Search input
@@ -241,10 +299,10 @@ modelSelect.addEventListener('change', () => {
   updateModelDetails(selectedModel);
 });
 
-// API key input change - reload models
+// API key input change - offer to load all models
 apiKeyInput.addEventListener('change', () => {
-  if (apiKeyInput.value.trim()) {
-    loadModels();
+  if (apiKeyInput.value.trim() && !hasLoadedFullList) {
+    loadMoreBtn.textContent = 'Load all models';
   }
 });
 
@@ -302,7 +360,10 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Load models on startup if we have an API key
+// Load free models on startup (no API key needed)
+loadFreeModels();
+
+// If we have an API key cached, also load full list
 if (hasApiKey()) {
-  loadModels();
+  loadAllModels();
 }

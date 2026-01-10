@@ -11,6 +11,93 @@ const STORAGE_KEYS = {
 };
 
 /**
+ * Free models available without API key (curated list)
+ * These are models with :free suffix or known free tier
+ */
+export const FREE_MODELS = [
+  {
+    id: 'google/gemini-2.0-flash-exp:free',
+    name: 'Gemini 2.0 Flash Experimental',
+    context_length: 1048576,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'Google Gemini 2.0 Flash - fast and free experimental model',
+    isFree: true
+  },
+  {
+    id: 'google/gemma-3n-e4b-it:free',
+    name: 'Gemma 3N E4B',
+    context_length: 32000,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'Google Gemma 3N - compact and efficient free model',
+    isFree: true
+  },
+  {
+    id: 'meta-llama/llama-3.3-8b-instruct:free',
+    name: 'Llama 3.3 8B Instruct',
+    context_length: 131072,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'Meta Llama 3.3 8B - powerful open source model',
+    isFree: true
+  },
+  {
+    id: 'mistralai/mistral-small-3.1-24b-instruct:free',
+    name: 'Mistral Small 3.1 24B',
+    context_length: 96000,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'Mistral Small 3.1 - excellent reasoning capabilities',
+    isFree: true
+  },
+  {
+    id: 'qwen/qwen3-4b-04-28:free',
+    name: 'Qwen3 4B',
+    context_length: 40960,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'Alibaba Qwen3 4B - compact multilingual model',
+    isFree: true
+  },
+  {
+    id: 'deepseek/deepseek-r1-0528:free',
+    name: 'DeepSeek R1',
+    context_length: 163840,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'DeepSeek R1 - advanced reasoning model',
+    isFree: true
+  },
+  {
+    id: 'deepseek/deepseek-r1-distill-llama-70b:free',
+    name: 'DeepSeek R1 Distill Llama 70B',
+    context_length: 131072,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'DeepSeek R1 distilled into Llama 70B architecture',
+    isFree: true
+  },
+  {
+    id: 'microsoft/phi-4:free',
+    name: 'Phi-4',
+    context_length: 16384,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'Microsoft Phi-4 - small but capable model',
+    isFree: true
+  },
+  {
+    id: 'nvidia/llama-3.1-nemotron-70b-instruct:free',
+    name: 'Nemotron 70B Instruct',
+    context_length: 131072,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'NVIDIA Nemotron - optimized Llama 3.1 70B',
+    isFree: true
+  },
+  {
+    id: 'tngtech/deepseek-r1t2-chimera:free',
+    name: 'DeepSeek R1T2 Chimera',
+    context_length: 163840,
+    pricing: { prompt: '0', completion: '0' },
+    description: 'TNG Tech Chimera - experimental creative model',
+    isFree: true
+  }
+];
+
+/**
  * Sort options for models
  */
 export const SortOption = {
@@ -254,6 +341,27 @@ export function filterModels(models, query) {
            id.includes(lowerQuery) ||
            description.includes(lowerQuery);
   });
+}
+
+/**
+ * Get free models (no API key required)
+ * @returns {Array} Array of free model objects
+ */
+export function getFreeModels() {
+  return [...FREE_MODELS];
+}
+
+/**
+ * Check if a model is free
+ * @param {Object} model - Model object
+ * @returns {boolean} True if model is free
+ */
+export function isModelFree(model) {
+  if (model.isFree) return true;
+  if (model.id?.endsWith(':free')) return true;
+  const promptPrice = parseFloat(model.pricing?.prompt || '1');
+  const completionPrice = parseFloat(model.pricing?.completion || '1');
+  return promptPrice === 0 && completionPrice === 0;
 }
 
 export { STORAGE_KEYS as MODELS_STORAGE_KEYS, CACHE_DURATION_MS };
