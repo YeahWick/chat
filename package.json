@@ -1,0 +1,24 @@
+{
+  "name": "openrouter-chat-client",
+  "version": "1.0.0",
+  "description": "Minimal chat web client for OpenRouter API with streaming support",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "serve": "npx serve ."
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "openrouter",
+    "chat",
+    "streaming",
+    "ai"
+  ],
+  "license": "MIT"
+}
