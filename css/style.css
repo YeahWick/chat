@@ -101,6 +101,119 @@ body {
   border-color: var(--accent);
 }
 
+/* Model selector section */
+.model-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.model-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.model-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cache-age {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.icon-btn.small {
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+  min-width: 32px;
+}
+
+.icon-btn.small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.model-filter-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.model-search {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.sort-select {
+  width: auto;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+#model-select {
+  height: auto;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+#model-select option {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+#model-select option:hover {
+  background: var(--bg-message-assistant);
+}
+
+#model-select option:checked {
+  background: var(--accent);
+  color: white;
+}
+
+.model-details {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 0.25rem;
+  min-height: 2.5rem;
+}
+
+.model-details .detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.model-details .detail-label {
+  color: var(--text-secondary);
+}
+
+.model-details .detail-value {
+  color: var(--text-primary);
+}
+
+.loading-spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .messages {
   flex: 1;
   overflow-y: auto;
