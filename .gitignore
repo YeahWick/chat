@@ -2,3 +2,25 @@ node_modules/
 coverage/
 .DS_Store
 *.log
+
+# Cordova generated directories
+platforms/
+plugins/
+
+# Build artifacts
+*.ipa
+*.apk
+*.aab
+
+# IDE and editor files
+.idea/
+*.xcworkspace
+*.xcuserdata
+*.gradle
+.gradle/
+build/
+local.properties
+
+# Temporary files
+*.tmp
+*.temp
