@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.openrouter.chat" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>OpenRouter Chat</name>
+    <description>Mobile chat client for OpenRouter API with streaming support</description>
+    <author email="dev@openrouter.chat" href="https://openrouter.ai">
+        OpenRouter Chat Team
+    </author>
+    <content src="index.html" />
+
+    <!-- Global preferences -->
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="Orientation" value="default" />
+    <preference name="BackupWebStorage" value="local" />
+    <preference name="SplashScreenDelay" value="1000" />
+    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="FadeSplashScreen" value="true" />
+    <preference name="FadeSplashScreenDuration" value="300" />
+    <preference name="Fullscreen" value="false" />
+
+    <!-- Allow access to OpenRouter API -->
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-navigation href="*" />
+
+    <!-- iOS Platform Configuration -->
+    <platform name="ios">
+        <preference name="WKWebViewOnly" value="true" />
+        <preference name="StatusBarOverlaysWebView" value="false" />
+        <preference name="StatusBarBackgroundColor" value="#1a1a2e" />
+        <preference name="StatusBarStyle" value="lightcontent" />
+        <preference name="KeyboardDisplayRequiresUserAction" value="false" />
+        <preference name="SuppressesIncrementalRendering" value="false" />
+        <preference name="AllowInlineMediaPlayback" value="true" />
+        <preference name="deployment-target" value="13.0" />
+
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+
+        <!-- Default iOS icon - Cordova will use this for all sizes if specific sizes aren't provided -->
+        <icon src="res/icon/icon.svg" />
+    </platform>
+
+    <!-- Android Platform Configuration -->
+    <platform name="android">
+        <preference name="android-minSdkVersion" value="24" />
+        <preference name="android-targetSdkVersion" value="34" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#1a1a2e" />
+        <preference name="StatusBarBackgroundColor" value="#1a1a2e" />
+        <preference name="StatusBarStyle" value="lightcontent" />
+        <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+
+        <allow-intent href="market:*" />
+
+        <!-- Default Android icon -->
+        <icon src="res/icon/icon.svg" />
+    </platform>
+
+    <!-- Plugins (added via npm/cordova plugin add) -->
+    <plugin name="cordova-plugin-statusbar" spec="^4.0.0" />
+    <plugin name="cordova-plugin-splashscreen" spec="^6.0.2" />
+</widget>
